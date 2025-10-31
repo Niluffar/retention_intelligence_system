@@ -11,7 +11,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 from src.utils.db_connectors import get_mongo_connector
 from src.data_engineering.mongo_extractor import MongoExtractor
-import json
+import json bvfdvf
 
 
 def main():
