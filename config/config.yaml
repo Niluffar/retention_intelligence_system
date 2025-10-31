@@ -1,0 +1,127 @@
+# Retention Intelligence System Configuration
+
+# Database connections (use environment variables for credentials)
+database:
+  postgres:
+    host: ${POSTGRES_HOST}
+    port: ${POSTGRES_PORT}
+    database: ${POSTGRES_DB}
+    schema: ris
+    user: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+
+  mongodb:
+    host: ${MONGO_HOST}
+    port: ${MONGO_PORT}
+    database: ${MONGO_DB}
+    user: ${MONGO_USER}
+    password: ${MONGO_PASSWORD}
+
+# Feature engineering
+features:
+  internal_factors:
+    - age
+    - gender
+    - weight
+    - height
+    - fat_percentage
+    - location
+    - work_type  # office/freelancer
+    - fitness_experience
+    - personality_type  # extrovert/introvert (friends count)
+    - social_commitment  # posts in feed
+    - in_clan
+    - feed_user
+    - leaderboard_user
+    - achievements_user
+    - fitness_goal
+    - referral_type
+    - had_trial
+    - transportation_mean
+    - job_position_finance
+    - has_children
+    - planning_behavior
+    - cancellation_rate_baseline
+    - engagement_baseline
+    - club
+    - heropass_type
+    - notification_enabled
+
+  external_factors:
+    - engagement_delta
+    - missed_delta
+    - cancellation_delta
+    - inbody_progress
+    - assessment_progress
+    - weights_progress
+    - support_interactions
+    - seasonality_external
+    - seasonality_internal  # within HP period
+    - time_in_app_delta
+    - steps_delta
+    - interest_supplements
+    - interest_merch
+    - completion_rate_delta
+    - time_outside_program
+    - assessment_frequency_delta
+    - trainers_variety
+    - trainings_variety
+    - booking_time_pattern_change
+    - late_arrivals
+    - hrm_usage_delta
+    - weight_entries_delta
+    - double_trainings
+    - freeze_days_used
+    - freeze_attempt_number
+    - freeze_behavior
+
+# Model configuration
+model:
+  target_windows: [30, 60, 90]  # days after HP end
+
+  baseline:
+    type: logistic_regression
+    cv_folds: 5
+
+  advanced:
+    xgboost:
+      max_depth: 6
+      learning_rate: 0.01
+      n_estimators: 500
+      early_stopping_rounds: 50
+
+    survival:
+      type: cox_ph
+      penalizer: 0.1
+
+# Scoring thresholds
+scoring:
+  risk_bands:
+    very_high: [0.0, 0.3]   # 0-30% retention probability
+    high: [0.3, 0.5]        # 30-50%
+    medium: [0.5, 0.7]      # 50-70%
+    low: [0.7, 0.85]        # 70-85%
+    very_low: [0.85, 1.0]   # 85-100%
+
+  intervention_thresholds:
+    critical: 0.3
+    warning: 0.5
+    watch: 0.7
+
+# Data Quality
+data_quality:
+  user_min_weeks: 4  # minimum weeks of data per user
+  feature_null_threshold: 0.3  # max null percentage
+  outlier_std_threshold: 5  # standard deviations for outliers
+
+# Paths
+paths:
+  data: ./data
+  models: ./models
+  logs: ./logs
+  reports: ./reports
+
+# MLflow
+mlflow:
+  tracking_uri: ./mlruns
+  experiment_name: ris_retention_prediction

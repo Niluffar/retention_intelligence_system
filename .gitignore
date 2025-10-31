@@ -1,0 +1,102 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+# Keep notebooks in git, but not checkpoint files
+
+# Data files (exclude all data)
+data/
+*.csv
+*.parquet
+*.pkl
+*.pickle
+*.db
+*.sqlite
+*.json.gz
+*.feather
+
+# Credentials (IMPORTANT - never commit)
+.env
+config/.env
+config/credentials.json
+config/db_credentials.yaml
+*.pem
+*.key
+*_secret*
+*_token*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.history/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Logs (exclude all logs)
+logs/
+*.log
+
+# Model artifacts (exclude large model files)
+models/*.pkl
+models/*.joblib
+models/*.h5
+models/*.onnx
+models/*.pt
+models/*.pth
+models/*.bin
+
+# Keep model metadata
+!models/metadata/
+!models/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+tree_output.txt
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Virtual environments
+.venv
+venv/
+ENV/
+env/
