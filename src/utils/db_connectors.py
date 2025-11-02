@@ -182,15 +182,36 @@ class MongoConnector:
         self.database_name = os.getenv('MONGO_DB', db_config.get('database'))
         self.user = os.getenv('MONGO_USER', db_config.get('user'))
         self.password = os.getenv('MONGO_PASSWORD', db_config.get('password'))
+        self.replica_set = os.getenv('MONGO_REPLICA_SET', db_config.get('replica_set'))
 
         self._client: Optional[MongoClient] = None
 
     @property
     def connection_string(self) -> str:
         """Get MongoDB connection string"""
+        # Handle multiple hosts (replica set)
+        hosts = self.host
+        port = self.port
+
+        # Build host:port pairs
+        if ',' in hosts:
+            # Multiple hosts for replica set
+            host_list = hosts.split(',')
+            host_port_pairs = ','.join([f"{h.strip()}:{port}" for h in host_list])
+        else:
+            host_port_pairs = f"{hosts}:{port}"
+
+        # Build connection string
         if self.user and self.password:
-            return f"mongodb://{self.user}:{self.password}@{self.host}:{self.port}/{self.database_name}"
-        return f"mongodb://{self.host}:{self.port}/{self.database_name}"
+            conn_str = f"mongodb://{self.user}:{self.password}@{host_port_pairs}/{self.database_name}"
+        else:
+            conn_str = f"mongodb://{host_port_pairs}/{self.database_name}"
+
+        # Add replica set if specified
+        if self.replica_set:
+            conn_str += f"?replicaSet={self.replica_set}"
+
+        return conn_str
 
     @property
     def client(self) -> MongoClient:
