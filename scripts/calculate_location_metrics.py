@@ -19,16 +19,16 @@ from utils.db_connectors import PostgresConnector, MongoConnector
 # Club coordinates - ACTUAL COORDINATES FROM HERO'S JOURNEY (5 active clubs)
 CLUB_COORDINATES = {
     # Almaty (3 clubs)
-    'HJ Colibri': {'lat': 43.240394, 'lon': 76.955230},      # ул. Шокана Уалиханова, 170/1
-    'HJ Promenade': {'lat': 43.240191, 'lon': 76.925280},    # просп. Абая, 44А
-    'HJ Променад': {'lat': 43.240191, 'lon': 76.925280},     # Same as Promenade (Russian spelling)
-    'HJ Villa': {'lat': 43.211083, 'lon': 76.920079},        # просп. Аль-Фараби, 140А
+    'HJ Colibri': {'lat': 43.2398083, 'lon': 76.9527295},      # ул. Шокана Уалиханова, 170/1
+    'HJ Promenade': {'lat': 43.2397899, 'lon': 76.9240991},    # просп. Абая, 44А
+    'HJ Променад': {'lat': 43.2397899, 'lon': 76.9240991},     # Same as Promenade (Russian spelling)
+    'HJ Villa': {'lat': 43.2116139, 'lon': 76.9180874},        # просп. Аль-Фараби, 140А
 
     # Astana (2 clubs)
-    'HJ Nurly Orda': {'lat': 51.140048, 'lon': 71.413343},   # просп. Кабанбай Батыра, 11/5
-    'Nurly Orda': {'lat': 51.140048, 'lon': 71.413343},      # Without HJ prefix
-    'HJ Europe City': {'lat': 51.119612, 'lon': 71.424578},  # ул. Акмешит, 1/1
-    'Europe City': {'lat': 51.119612, 'lon': 71.424578},     # Without HJ prefix
+    'HJ Nurly Orda': {'lat': 51.1403179, 'lon': 71.4102712},   # просп. Кабанбай Батыра, 11/5
+    'Nurly Orda': {'lat': 51.1403179, 'lon': 71.4102712},      # Without HJ prefix
+    'HJ Europe City': {'lat': 51.1208937, 'lon': 71.4206657},  # ул. Акмешит, 1/1
+    'Europe City': {'lat': 51.1208937, 'lon': 71.4206657},     # Without HJ prefix
 }
 
 
