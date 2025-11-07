@@ -309,7 +309,7 @@ def main():
           when coalesce(hp.club_hp_name, upc.club_name) = 'HJ Villa'
                and coalesce(hp.hp_created_at, c.user_created_at, current_date)::date < date '2025-06-01'
             then 'HJ Colibri'
-          when coalesce(hp.club_hp_name, upc.club_name) = 'HJ Променад'
+          when coalesce(hp.club_hp_name, upc.club_name) = 'HJ Promenade'
                and coalesce(hp.hp_created_at, c.user_created_at, current_date)::date < date '2025-04-01'
             then 'HJ Colibri'
           when coalesce(hp.club_hp_name, upc.club_name) = 'HJ Europe City'
@@ -323,7 +323,7 @@ def main():
               when coalesce(hp.club_hp_name, upc.club_name) = 'HJ Villa'
                    and coalesce(hp.hp_created_at, c.user_created_at, current_date)::date < date '2025-06-01'
                 then 'HJ Colibri'
-              when coalesce(hp.club_hp_name, upc.club_name) = 'HJ Променад'
+              when coalesce(hp.club_hp_name, upc.club_name) = 'HJ Promenade'
                    and coalesce(hp.hp_created_at, c.user_created_at, current_date)::date < date '2025-04-01'
                 then 'HJ Colibri'
               when coalesce(hp.club_hp_name, upc.club_name) = 'HJ Europe City'
@@ -331,7 +331,7 @@ def main():
                 then 'HJ Nurly Orda'
               else coalesce(hp.club_hp_name, upc.club_name)
             end
-          ) in ('HJ Nurly Orda','Nurly Orda','HJ Europe City','Europe City')
+          ) in ('HJ Nurly Orda', 'HJ Europe City')
             then 'Астана'
           else 'Алматы'
         end as city,
@@ -412,13 +412,19 @@ def main():
 
     # Step 2: Load location metrics
     print("\n2. Loading location metrics...")
-    loc_file = Path(__file__).parent / 'data' / 'processed' / 'user_location_metrics_20251102_223735.csv'
+    processed_dir = Path(__file__).parent / 'data' / 'processed'
 
-    if not loc_file.exists():
-        print(f"   WARNING: Location metrics file not found: {loc_file}")
+    # Find the most recent location metrics file
+    location_files = list(processed_dir.glob('user_location_metrics_*.csv'))
+
+    if not location_files:
+        print(f"   WARNING: No location metrics files found in {processed_dir}")
         print("   Continuing without location data...")
         df_location = pd.DataFrame()
     else:
+        # Sort by filename (which includes timestamp) and get the latest
+        loc_file = sorted(location_files)[-1]
+        print(f"   Using location metrics file: {loc_file.name}")
         df_location = pd.read_csv(loc_file)
         print(f"   Loaded {len(df_location)} location metrics")
 

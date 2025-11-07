@@ -5,6 +5,7 @@ Database connectors for PostgreSQL and MongoDB
 import os
 from typing import Optional, Dict, Any
 from contextlib import contextmanager
+from pathlib import Path
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -15,8 +16,9 @@ import yaml
 from dotenv import load_dotenv
 
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from config/.env
+env_path = Path(__file__).parent.parent.parent / 'config' / '.env'
+load_dotenv(dotenv_path=env_path)
 
 
 class PostgresConnector:
@@ -170,6 +172,9 @@ class MongoConnector:
         Args:
             config_path: Path to config YAML file (optional)
         """
+        # Check if full connection string is provided
+        self.connection_string_override = os.getenv('MONGO_CONNECTION_STRING')
+
         if config_path:
             with open(config_path, 'r') as f:
                 config = yaml.safe_load(f)
@@ -189,6 +194,11 @@ class MongoConnector:
     @property
     def connection_string(self) -> str:
         """Get MongoDB connection string"""
+        # If full connection string is provided, use it
+        if self.connection_string_override:
+            return self.connection_string_override
+
+        # Otherwise, build from components
         # Handle multiple hosts (replica set)
         hosts = self.host
         port = self.port

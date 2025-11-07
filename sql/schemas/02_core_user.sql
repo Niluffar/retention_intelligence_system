@@ -86,6 +86,7 @@ CREATE TABLE ris.core_user (
     -- Distance metrics
     distance_home_to_club_km DECIMAL(6, 2),
     avg_booking_distance_km DECIMAL(6, 2),
+    min_booking_distance_km DECIMAL(6, 2),
     distance_variability DECIMAL(6, 2),
 
     -- Flags and scores

@@ -94,6 +94,8 @@ def determine_home_location(df_locations: pd.DataFrame, user_id: str) -> Optiona
     # Extract hour if created_at exists
     if 'created_at' in user_locs.columns:
         user_locs['created_at'] = pd.to_datetime(user_locs['created_at'], errors='coerce')
+        # Add 5 hours to convert from UTC to Kazakhstan time (UTC+5)
+        user_locs['created_at'] = user_locs['created_at'] + pd.Timedelta(hours=5)
         user_locs['hour'] = user_locs['created_at'].dt.hour
         user_locs['is_night'] = user_locs['hour'].apply(
             lambda h: h >= 22 or h <= 8 if pd.notna(h) else False
@@ -162,6 +164,7 @@ def calculate_user_metrics(
         'location_sample_size': 0,
         'distance_home_to_club_km': None,
         'avg_booking_distance_km': None,
+        'min_booking_distance_km': None,
         'distance_variability': None,
         'is_home_nearby': False,
         'commute_convenience_score': None,
@@ -216,6 +219,43 @@ def calculate_user_metrics(
         if distances:
             # Average booking distance
             metrics['avg_booking_distance_km'] = round(np.mean(distances), 2)
+
+            # Minimum booking distance from TOP-2 location clusters
+            # (to avoid random outliers, we take min from 2 most frequent locations: home + work)
+            user_locs_copy = user_locs.copy()
+            user_locs_copy['lat_rounded'] = user_locs_copy['latitude'].round(4)
+            user_locs_copy['lon_rounded'] = user_locs_copy['longitude'].round(4)
+
+            location_clusters = (
+                user_locs_copy
+                .groupby(['lat_rounded', 'lon_rounded'])
+                .agg({
+                    'latitude': 'mean',
+                    'longitude': 'mean',
+                    'userId': 'count'
+                })
+                .rename(columns={'userId': 'count'})
+                .reset_index()
+                .nlargest(2, 'count')  # Top-2 most frequent locations
+            )
+
+            if len(location_clusters) > 0:
+                # Calculate distance from each top cluster to club
+                cluster_distances = []
+                for _, cluster in location_clusters.iterrows():
+                    cluster_dist = haversine_distance(
+                        cluster['latitude'],
+                        cluster['longitude'],
+                        club_coords['lat'],
+                        club_coords['lon']
+                    )
+                    cluster_distances.append(cluster_dist)
+
+                # Take minimum from top-2 clusters
+                metrics['min_booking_distance_km'] = round(min(cluster_distances), 2)
+            else:
+                # Fallback to absolute min if clustering fails
+                metrics['min_booking_distance_km'] = round(np.min(distances), 2)
 
             # Variability (standard deviation)
             if len(distances) > 1:
