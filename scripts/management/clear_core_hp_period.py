@@ -1,6 +1,4 @@
-"""
-Clear core_hp_period table
-"""
+
 
 import sys
 from pathlib import Path
@@ -15,12 +13,11 @@ def main():
     """Clear all data from core_hp_period table"""
     print("\n" + "=" * 70)
     print("CLEARING CORE_HP_PERIOD TABLE")
-    print("=" * 70)
+    
 
     pg = PostgresConnector()
 
-    # Check current count
-    with pg.get_cursor() as cursor:
+        with pg.get_cursor() as cursor:
         cursor.execute("SELECT COUNT(*) as cnt FROM ris.core_hp_period;")
         count_before = cursor.fetchone()['cnt']
 
@@ -28,7 +25,7 @@ def main():
 
     if count_before == 0:
         print("\nTable is already empty. Nothing to clear.")
-        print("=" * 70 + "\n")
+        
         return
 
     # Clear table
@@ -44,8 +41,7 @@ def main():
         print(f"   ERROR: {str(e)}")
         return
 
-    # Verify
-    with pg.get_cursor() as cursor:
+        with pg.get_cursor() as cursor:
         cursor.execute("SELECT COUNT(*) as cnt FROM ris.core_hp_period;")
         count_after = cursor.fetchone()['cnt']
 
@@ -53,7 +49,7 @@ def main():
 
     print("\n" + "=" * 70)
     print("CLEARED SUCCESSFULLY")
-    print("=" * 70 + "\n")
+    
 
 
 if __name__ == "__main__":

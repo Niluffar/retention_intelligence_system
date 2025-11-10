@@ -1,30 +1,18 @@
-"""
-Populate core_user table with data from PostgreSQL and location metrics
-"""
-
 import sys
 from pathlib import Path
 import pandas as pd
 from datetime import datetime
 
-# Add src to path
-sys.path.insert(0, str(Path(__file__).parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'src'))
 
 from utils.db_connectors import PostgresConnector
 
 
 def main():
-    """Populate core_user table"""
-    print("\n" + "=" * 70)
-    print("POPULATING CORE_USER TABLE")
-    print("=" * 70)
+    print("Loading user data from PostgreSQL...")
 
     pg = PostgresConnector()
 
-    # Step 1: Load base user data from your SQL query
-    print("\n1. Loading user data from PostgreSQL...")
-
-    # Your full SQL query (use raw string to avoid escape issues)
     base_query = r"""
     with base as (
       select
@@ -392,122 +380,74 @@ def main():
     )
     """
 
-    # Use cursor method (more reliable with complex queries)
     try:
         with pg.get_cursor() as cursor:
             cursor.execute(base_query)
             rows = cursor.fetchall()
 
-        print(f"   Fetched {len(rows)} rows from database")
-
-        # Convert to DataFrame
         df_base = pd.DataFrame(rows)
-        print(f"   Loaded {len(df_base)} users from base query")
+        print(f"Loaded {len(df_base)} users")
 
     except Exception as e:
-        print(f"   ERROR loading data: {str(e)}")
-        import traceback
-        traceback.print_exc()
+        print(f"Error loading data: {str(e)}")
         return
 
-    # Step 2: Load location metrics
-    print("\n2. Loading location metrics...")
-    processed_dir = Path(__file__).parent / 'data' / 'processed'
+    print("Loading location metrics...")
+    processed_dir = Path(__file__).parent.parent.parent / 'data' / 'processed'
 
-    # Find the most recent location metrics file
     location_files = list(processed_dir.glob('user_location_metrics_*.csv'))
 
     if not location_files:
-        print(f"   WARNING: No location metrics files found in {processed_dir}")
-        print("   Continuing without location data...")
+        print(f"Warning: No location metrics found")
         df_location = pd.DataFrame()
     else:
-        # Sort by filename (which includes timestamp) and get the latest
         loc_file = sorted(location_files)[-1]
-        print(f"   Using location metrics file: {loc_file.name}")
+        print(f"Using: {loc_file.name}")
         df_location = pd.read_csv(loc_file)
-        print(f"   Loaded {len(df_location)} location metrics")
 
-    # Step 3: Merge data
-    print("\n3. Merging datasets...")
+    print("Merging datasets...")
     if len(df_location) > 0:
-        df_merged = df_base.merge(
-            df_location,
-            on='user_id',
-            how='left'
-        )
-        print(f"   Merged: {len(df_merged)} rows")
-        print(f"   With location data: {df_merged['distance_home_to_club_km'].notna().sum()}")
+        df_merged = df_base.merge(df_location, on='user_id', how='left')
+        print(f"Merged {len(df_merged)} rows")
     else:
         df_merged = df_base
-        # Add empty location columns
         df_merged['home_latitude'] = None
         df_merged['home_longitude'] = None
         df_merged['home_location_confidence'] = None
         df_merged['location_sample_size'] = 0
         df_merged['distance_home_to_club_km'] = None
         df_merged['avg_booking_distance_km'] = None
+        df_merged['min_booking_distance_km'] = None
         df_merged['distance_variability'] = None
         df_merged['is_home_nearby'] = False
         df_merged['commute_convenience_score'] = None
         df_merged['location_data_quality'] = 'none'
 
-    # Step 4: Insert into table
-    print("\n4. Inserting data into ris.core_user...")
+    print("Inserting into ris.core_user...")
 
-    # Prepare data for insertion
     df_merged['created_at'] = datetime.now()
     df_merged['updated_at'] = datetime.now()
 
     try:
-        # Use pandas to_sql for bulk insert
         df_merged.to_sql(
             name='core_user',
             schema='ris',
             con=pg.engine,
-            if_exists='append',  # append to existing table
+            if_exists='append',
             index=False,
             method='multi',
             chunksize=500
         )
-
-        print(f"   SUCCESS: Inserted {len(df_merged)} rows")
+        print(f"Inserted {len(df_merged)} rows")
 
     except Exception as e:
-        print(f"   ERROR: {str(e)}")
+        print(f"Error: {str(e)}")
         return
 
-    # Step 5: Verify
-    print("\n5. Verifying data...")
     with pg.get_cursor() as cursor:
         cursor.execute("SELECT COUNT(*) as cnt FROM ris.core_user;")
         count = cursor.fetchone()['cnt']
-        print(f"   Total rows in table: {count:,}")
-
-        # Sample data
-        cursor.execute("""
-            SELECT
-                user_id,
-                firstname,
-                default_club_corr,
-                city,
-                distance_home_to_club_km,
-                ever_hp
-            FROM ris.core_user
-            LIMIT 5;
-        """)
-        samples = cursor.fetchall()
-
-        print("\n   Sample rows:")
-        for row in samples:
-            print(f"     - {row['user_id']}: {row['firstname']} | {row['default_club_corr']} | {row['city']} | dist={row['distance_home_to_club_km']} km | HP={row['ever_hp']}")
-
-    print("\n" + "=" * 70)
-    print("POPULATION COMPLETE")
-    print("=" * 70)
-    print(f"Rows inserted: {len(df_merged):,}")
-    print(f"Total in table: {count:,}")
-    print("=" * 70 + "\n")
+        print(f"Total in table: {count:,}")
 
 
 if __name__ == "__main__":

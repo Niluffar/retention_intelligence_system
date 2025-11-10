@@ -1,7 +1,4 @@
-"""
-Calculate location-based metrics for users
-Includes: home location, distance to club, commute patterns
-"""
+
 
 import sys
 from pathlib import Path
@@ -33,33 +30,20 @@ CLUB_COORDINATES = {
 
 
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """
-    Calculate the great circle distance between two points on earth (in kilometers)
-
-    Args:
-        lat1, lon1: Coordinates of first point
-        lat2, lon2: Coordinates of second point
-
-    Returns:
-        Distance in kilometers
-    """
+    """Calculate distance in km"""
     from math import radians, sin, cos, sqrt, atan2
 
-    # Earth radius in kilometers
-    R = 6371.0
+        R = 6371.0
 
-    # Convert to radians
-    lat1_rad = radians(lat1)
+        lat1_rad = radians(lat1)
     lon1_rad = radians(lon1)
     lat2_rad = radians(lat2)
     lon2_rad = radians(lon2)
 
-    # Differences
-    dlat = lat2_rad - lat1_rad
+        dlat = lat2_rad - lat1_rad
     dlon = lon2_rad - lon1_rad
 
-    # Haversine formula
-    a = sin(dlat / 2)**2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)**2
+        a = sin(dlat / 2)**2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)**2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     distance = R * c
@@ -67,21 +51,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
 
 
 def determine_home_location(df_locations: pd.DataFrame, user_id: str) -> Optional[Dict]:
-    """
-    Determine user's home location based on location patterns
-
-    Strategy:
-    1. Round coordinates to ~50m precision (4 decimal places)
-    2. Find most frequent location cluster
-    3. Prefer night/weekend locations if available
-
-    Args:
-        df_locations: DataFrame with user location history
-        user_id: User ID
-
-    Returns:
-        Dict with home location info or None
-    """
+    """Determine home location"""
     user_locs = df_locations[df_locations['userId'] == user_id].copy()
 
     if len(user_locs) == 0:
@@ -144,17 +114,7 @@ def calculate_user_metrics(
     club_name: str,
     df_locations: pd.DataFrame
 ) -> Dict:
-    """
-    Calculate all location metrics for a user
-
-    Args:
-        user_id: User ID
-        club_name: User's primary club name
-        df_locations: DataFrame with all location data
-
-    Returns:
-        Dict with all calculated metrics
-    """
+    """Calculate distance in km"""
     # Default metrics
     metrics = {
         'user_id': user_id,
@@ -312,8 +272,7 @@ def main():
     # Get user data from PostgreSQL - ONLY users with location data
     print("\n3. Loading user data from PostgreSQL (only users with locations)...")
 
-    # Convert list to SQL-compatible format
-    user_ids_list = "','".join(mongo_user_ids_str)
+        user_ids_list = "','".join(mongo_user_ids_str)
 
     user_query = f"""
     SELECT
@@ -344,8 +303,7 @@ def main():
     locations_data = list(collection.find())
     print(f"   Loaded {len(locations_data)} location records")
 
-    # Convert to DataFrame
-    df_locations = pd.DataFrame(locations_data)
+        df_locations = pd.DataFrame(locations_data)
 
     # Extract coordinates from nested location dict
     if 'location' in df_locations.columns:
@@ -356,8 +314,7 @@ def main():
             lambda x: x.get('longitude') if isinstance(x, dict) else None
         )
 
-    # Convert userId to string for matching
-    df_locations['userId'] = df_locations['userId'].astype(str)
+        df_locations['userId'] = df_locations['userId'].astype(str)
     df_users['user_id'] = df_users['user_id'].astype(str)
 
     # Remove records without coordinates

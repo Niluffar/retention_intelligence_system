@@ -1,6 +1,4 @@
-"""
-Populate core_hp_period table with HeroPass data
-"""
+
 
 import sys
 from pathlib import Path
@@ -17,15 +15,13 @@ def main():
     """Populate core_hp_period table"""
     print("\n" + "=" * 70)
     print("POPULATING CORE_HP_PERIOD TABLE")
-    print("=" * 70)
+    
 
     pg = PostgresConnector()
 
-    # Step 1: Load HeroPass data from PostgreSQL
-    print("\n1. Loading HeroPass data from PostgreSQL...")
+        print("\n1. Loading HeroPass data from PostgreSQL...")
 
-    # Your full SQL query
-    base_query = r"""
+        base_query = r"""
     with hp_raw as (
         select
             uhp.id as hp_period_id,
@@ -107,8 +103,7 @@ def main():
     order by h.user_id, h.hp_start
     """
 
-    # Use pandas to load data
-    try:
+        try:
         df_hp = pd.read_sql(base_query, pg.engine)
         print(f"   Loaded {len(df_hp)} HeroPass periods from database")
     except Exception as e:
@@ -117,8 +112,7 @@ def main():
         traceback.print_exc()
         return
 
-    # Step 2: Calculate additional fields
-    print("\n2. Calculating additional fields...")
+        print("\n2. Calculating additional fields...")
 
     # Calculate days_to_next_hp
     df_hp['days_to_next_hp'] = (
@@ -143,12 +137,10 @@ def main():
     print(f"   Renewed HeroPasses: {df_hp['renewed'].sum():,}")
     print(f"   Not renewed: {(~df_hp['renewed']).sum():,}")
 
-    # Step 3: Insert into table
-    print("\n3. Inserting data into ris.core_hp_period...")
+        print("\n3. Inserting data into ris.core_hp_period...")
 
     try:
-        # Use pandas to_sql for bulk insert
-        df_hp.to_sql(
+                df_hp.to_sql(
             name='core_hp_period',
             schema='ris',
             con=pg.engine,
@@ -166,15 +158,13 @@ def main():
         traceback.print_exc()
         return
 
-    # Step 4: Verify
-    print("\n4. Verifying data...")
+        print("\n4. Verifying data...")
     with pg.get_cursor() as cursor:
         cursor.execute("SELECT COUNT(*) as cnt FROM ris.core_hp_period;")
         count = cursor.fetchone()['cnt']
         print(f"   Total rows in table: {count:,}")
 
-        # Sample data
-        cursor.execute("""
+                cursor.execute("""
             SELECT
                 hp_period_id,
                 user_id,
@@ -221,10 +211,10 @@ def main():
 
     print("\n" + "=" * 70)
     print("POPULATION COMPLETE")
-    print("=" * 70)
+    
     print(f"Rows inserted: {len(df_hp):,}")
     print(f"Total in table: {count:,}")
-    print("=" * 70 + "\n")
+    
 
 
 if __name__ == "__main__":
