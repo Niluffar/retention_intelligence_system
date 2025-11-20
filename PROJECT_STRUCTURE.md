@@ -14,11 +14,12 @@ retention_intelligence_system/
 │   │   ├── 01_create_schema.sql     # Создание схемы ris
 │   │   ├── 02_core_user.sql         # Таблица пользователей
 │   │   ├── 03_core_hp_period.sql    # Таблица периодов HeroPass
-│   │   ├── 04_fact_user_week.sql    # Недельные метрики
-│   │   ├── 05_label_hp.sql          # Таргеты для моделей
-│   │   ├── 06_interval_hp.sql       # Интервалы для survival
-│   │   ├── 07_ref_calendar.sql      # Календарь
-│   │   └── 08_meta_tables.sql       # Служебные таблицы
+│   │   ├── 04_ref_calendar.sql      # Календарь
+│   │   ├── 05_core_user_subscription.sql # Completion rate по абонементам
+│   │   ├── 06_fact_user_week.sql    # Недельные метрики
+│   │   ├── 07_label_hp.sql          # Таргеты для моделей
+│   │   ├── 08_interval_hp.sql       # Интервалы для survival
+│   │   └── 09_meta_tables.sql       # Служебные таблицы
 │   │
 │   ├── marts/                       # DML - заполнение витрин
 │   │   ├── populate_core_user.sql

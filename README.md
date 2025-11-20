@@ -90,6 +90,7 @@ retention_intelligence_system/
 |---------|----------|------|
 | `core_user` | Профиль + внутренние факторы (1 строка на юзера) | - |
 | `core_hp_period` | Периоды HeroPass + учет freeze | - |
+| `core_user_subscription` | Completion rate по абонементам/марафонам | - |
 | `fact_user_week` | Недельные метрики + персональные нормы + дельты | - |
 
 ### Таргеты
